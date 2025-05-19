@@ -115,7 +115,7 @@ def rename_pdfs(pdf_paths):
         
         # 生成新文件名（包含数量）
         #new_name = f"发票_{data['合同编号']}_{data['发票号码']}_{data['供应商名称']}_{data['开票日期']}_{data['数量']}.pdf"
-        new_name = f"发票_{data['合同编号']}_{data['发票号码']}_{data['供应商名称']}_{data['项目名称']}_{data['数量']}.pdf"
+        new_name = f"发票{data['合同编号']}_{data['发票号码']}_{data['供应商名称']}_{data['项目名称']}_{data['数量']}.pdf"
         new_path = os.path.join(os.path.dirname(pdf_path), new_name)
         
         try:
@@ -125,7 +125,11 @@ def rename_pdfs(pdf_paths):
             print(f"重命名失败: {e}")
 
 def drop_pdf(event):
-    file_paths = event.data.split()
+    import re
+    # 支持 Windows 和 macOS 拖拽路径解析
+    file_paths = re.findall(r'\{(.*?)\}', event.data)  # 提取大括号内的路径（Windows）
+    if not file_paths:
+        file_paths = event.data.strip().split()  # 回退：macOS 或无括号格式
     try:
         rename_pdfs(file_paths)
         messagebox.showinfo("成功", "文件重命名完成！")
